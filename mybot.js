@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require('./config.json');
+//const ytdl = require('ytdl-core');
 const fs = require('fs')
 
 client.login(config.token);
@@ -19,12 +20,17 @@ client.on('message', (message) => {
   }else // RETURNS A RANDOM NUMBER FROM A MIN TO A MAX
   if (message.content.startsWith(prefix + 'random')){
     let args = message.content.split(' ').slice(1);
+    if (args.length>2){
+      message.channel.send("ERROR: Put a minimum number and a largest number after command (whole numbers only)");
+      return;
+    }
     let smallInt = parseInt(args[0]);
     let bigInt = parseInt(args[1]);
     let randInt = Math.floor(Math.random() * (bigInt-smallInt+1))+smallInt;
     if (isNaN(randInt)){
       message.channel.send("ERROR: Put a minimum number and a largest number after command (whole numbers only)");
-    }else {
+    }
+    else {
       message.channel.send(randInt);
     }
   }else // RESPONDS BOOSTED
