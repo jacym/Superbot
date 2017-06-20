@@ -1,8 +1,10 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require('./config.json');
-//const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core');
 const fs = require('fs')
+
+var queue = {};
 
 client.login(config.token);
 
@@ -50,6 +52,28 @@ client.on('message', (message) => {
   }else //help
   if (message.content.startsWith(prefix+'help')){
     message.channel.send("Check your Direct Messages!")
-    message.author.send("[COMMMANDS] \n help: Get the command list sent to you again \n kek: messages back with BOOSTED \n wow: Messages back with wow! \n random x y: returns a whole number between the 2 numbers inserted \n game [game name]: asks everyone on the server to play the game input \n ping: lets you know if the bot is connected by responding connected! \n Thanks For Reading!");
+    message.author.send('``` [COMMMANDS] \n help: Get the command list sent to you again \n kek: messages back with BOOSTED \n wow: Messages back with wow! \n random x y: returns a whole number between the 2 numbers inserted \n game [game name]: asks everyone on the server to play the game input \n ping: lets you know if the bot is connected by responding connected! \n Thanks For Reading!```');
+  }else// MUSIC BOT
+  if(message.content.startsWith(prefix+'play')){
+    let link=message.content.split(" ")[1]; //only get the link to the youtube song
+    if (link=='' || link== undefined){//if a link isnt provided (FIX FOR MULTIPURPOSE PLAY COMMAND)
+      return message.channel.send("To play a song put a youtube link in after the command. \n One link per command please!");
+    }
+    ytdl.getInfo(link, (err, info)=> {
+      if (err){//Link not correct/broken
+        return message.channel.send("This link doesn't seem to work, check your URL and try again");
+      }
+      if(!queue.hasOwnProperty(message.guild.id)) queue[message.guild.id]={}, queue[message.guild.id].playing=false, queue[message.guild.id].songs=[];
+      queue[message.guild.id].songs.push({link: link, name: info.title, dj: message.author.username});
+      message.channel.send(`**${message.author.username}** added **${info.title}** to number **${Object.keys(queue[message.guild.id].songs).length}** in the playlist`);
+    });
+  }else
+  if(message.content.startsWith(prefix+'list')){
+    if (queue[message.guild.id]==undefined){
+      return message.channel.send("Add some songs to your list first with the play command");
+    }
+    let printlist=[];
+    queue[message.guild.id].songs.forEach((song, i)=> {printlist.push(`${i+1}. ${song.name} - requested by ${song.dj}`);});
+    message.channel.send(`__**${message.guild.name}'s Music List:**__ Currently **${printlist.length}** songs in playlist \n \`\`\`${printlist.join('\n')}\`\`\``);
   }
 });
