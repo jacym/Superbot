@@ -12,6 +12,9 @@ client.login(config.token);
 client.on('ready', () => {
   console.log('I am ready!');
 });
+
+let prefix = config.prefix;
+
 //on message to the server
 client.on('message', (message) => {
   function songadd(song){
@@ -33,21 +36,21 @@ client.on('message', (message) => {
     player=message.guild.voiceConnection.playFile(yt(song.song,{audioonly:true}),{passes: 1});
     let collector = message.channel.createCollector(m => m);
     collector.on('message', m => {
-      if (m.content.startsWith(tokens.prefix + 'pause')) {
+      if (m.content.startsWith(prefix + 'pause')) {
         message.channel.sendMessage('paused').then(() => {player.pause();});
-      } else if (m.content.startsWith(tokens.prefix + 'resume')){
+      } else if (m.content.startsWith(prefix + 'resume')){
         message.channel.sendMessage('resumed').then(() => {player.resume();});
-      } else if (m.content.startsWith(tokens.prefix + 'skip')){
+      } else if (m.content.startsWith(prefix + 'skip')){
         message.channel.sendMessage('skipped').then(() => {player.end();});
       } else if (m.content.startsWith('volume+')){
         if (Math.round(player.volume*50) >= 100) return message.channel.sendMessage(`Volume: ${Math.round(player.volume*50)}%`);
-        player.setVolume(Math.min((player.volume*50 + (2*(m.content.split('+').length-1)))/50,2));
+        player.setVolume(Math.min((volume*50 + (2*(m.content.split('+').length-1)))/50,2));
         message.channel.sendMessage(`Volume: ${Math.round(player.volume*50)}%`);
       } else if (m.content.startsWith('volume-')){
         if (Math.round(player.volume*50) <= 0) return message.channel.sendMessage(`Volume: ${Math.round(player.volume*50)}%`);
         player.setVolume(Math.max((player.volume*50 - (2*(m.content.split('-').length-1)))/50,0));
         message.channel.sendMessage(`Volume: ${Math.round(player.volume*50)}%`);
-      } else if (m.content.startsWith(tokens.prefix + 'time')){
+      } else if (m.content.startsWith(prefix + 'time')){
         message.channel.sendMessage(`time: ${Math.floor(player.time / 60000)}:${Math.floor((player.time % 60000)/1000) <10 ? '0'+Math.floor((player.time % 60000)/1000) : Math.floor((player.time % 60000)/1000)}`);
       }
     });
@@ -63,8 +66,6 @@ client.on('message', (message) => {
     });
   (queue[message.guild.id].songs.shift());
   }
-
-  let prefix = config.prefix;
 
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
